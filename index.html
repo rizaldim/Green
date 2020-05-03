@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Green</title>
+	<link rel="stylesheet" href="/reset.css">
+	<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+	<div class="container stack">
+		<h1>Your expenses</h1>
+		<form>
+			Rp
+			<input id="amount" type="number" placeholder="amount" min="500" max="10000000">
+			<input id="description" type="text" placeholder="description">
+			<button>Add</button>
+		</form>
+		<p style="display: none">No expenses recorded</p>
+		<table style="display: none">
+			<thead>
+				<tr><th>Time</th><th>Amount (Rp)</th><th>Description</th></tr>
+			</thead>
+		</table>
+	</div>
+	<script src="/dayjs.min.js"></script>
+	<script src="/index.js"></script>
+</body>
+</html>
+	

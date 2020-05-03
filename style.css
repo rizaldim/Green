@@ -1,0 +1,23 @@
+.container {
+	padding: 1em 2em;
+}
+
+h1 {
+	font-size: 3rem;
+}
+
+input {
+	padding: .5em .2em;
+}
+
+thead {
+	border-bottom: 1px solid black;
+}
+
+td, th {
+	padding: .5em;
+}
+
+.stack > * + * {
+	margin-top: 3em;
+}
