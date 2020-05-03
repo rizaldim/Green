@@ -53,6 +53,9 @@
 		}
 	});
 
+	amountInput.value = "";
+	descInput.value = "";
+
 	if (!expenses) {
 		hideElement(table);
 		p.style.display = 'block';
