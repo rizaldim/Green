@@ -1,0 +1,30 @@
+{
+  "name": "green",
+  "version": "0.0.1",
+  "description": "",
+  "main": "rollup.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rfv dist/*",
+    "js": "rollup --config",
+    "css": "sass src/css/main.scss dist/css/style.css",
+    "copy": "cp src/pages/* dist/",
+    "build": "npm run clean && npm run js && npm run css && npm run copy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rizaldim/green.git"
+  },
+  "author": "Rizaldi Martaputra",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rizaldim/green/issues"
+  },
+  "homepage": "https://github.com/rizaldim/green#readme",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^7.1.3"
+  },
+  "dependencies": {
+    "date-fns": "^2.12.0"
+  }
+}
