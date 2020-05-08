@@ -1,63 +1,31 @@
 import { format, formatISO, parseISO } from 'date-fns';
+import { DBClient } from './localDb.js';
+import { view } from './view.js';
 
-var button = document.querySelector('button');
-var amountInput = document.querySelector('input#amount');
-var descInput = document.querySelector('input#description');
-var table = document.querySelector('table');
-var p = document.querySelector('p');
-
-var expenses = localStorage.getItem('expenses');
-
-var hideElement = function (el) {
-	el.style.display = 'none';
-}
-
-var constructRow = function (expense) {
-	var time = format(parseISO(expense.time), 'dd/MMM/yyyy HH:mm');
-	var row = document.createElement('tr');
-	row.innerHTML = '<td>' + time + '</td>' +
-		'<td>' + expense.amount + '</td>' +
-		'<td>' + expense.description + '</td>';
-	return row;
-}
-
-var addTableRow = function (expense) {
-	if (!expenses) hideElement(table);
-	var row = constructRow(expense);
-	table.appendChild(row);
-}
-
-var saveExpense = function (expense) {
-	if (!expenses) {
-		expenses = [];
-		table.style.display = 'block';
-	}
-
-	hideElement(p);
-	expenses.push(expense);
-	localStorage.setItem('expenses', JSON.stringify(expenses));
-	addTableRow(expense);
-}
-
-var onAddButtonClicked = function () {
-	saveExpense({
-		time: formatISO(new Date()),
-		amount: amountInput.value,
-		description: descInput.value
-	});
-}
-
-document.addEventListener('click', function (event) {
-	if (event.target == button) {
-		event.preventDefault();
-		onAddButtonClicked();
+var dbClient = new DBClient({
+	onSuccess: function (event) {
+		view.enableAddButton();
+	},
+	onError: function (event) {
 	}
 });
 
-amountInput.value = "";
-descInput.value = "";
+view.setEventHandler({
+	onAddButtonClicked: function (amount, desc) {
+		dbClient.saveExpense({
+			time: formatISO(new Date()),
+			amount: amount,
+			description: desc
+		}, function (expense) {
+			console.log('expense saved:');
+			console.log(expense);
+		});
+	}
+});
 
-if (!expenses) {
-	hideElement(table);
-	p.style.display = 'block';
-}
+document.addEventListener('click', function (event) {
+	view.handleEvent(event);
+});
+
+dbClient.open();
+view.clearForm();
