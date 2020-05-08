@@ -1,7 +1,0 @@
-{
-	"clean_urls": true,
-	"logging": {
-    "access": false,
-    "error": "warn"
-  }
-}
