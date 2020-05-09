@@ -1,3 +1,5 @@
+import { format, parseISO } from 'date-fns';
+
 export var view = (function () {
 	var button = document.querySelector('button');
 	var amountInput = document.querySelector('input#amount');
@@ -31,6 +33,9 @@ export var view = (function () {
 			amountInput.value = '';
 			descInput.value = '';
 		},
+		showParagraph: function () {
+			p.style.display = 'block';
+		},
 		hideParagraph: function () {
 			hideElement(p);
 		},
@@ -49,9 +54,25 @@ export var view = (function () {
 			return row;
 		},
 		addTableRow: function (expense) {
-			if (!expenses) hideElement(table);
-			var row = constructRow(expense);
+			var row = this.constructRow(expense);
 			table.appendChild(row);
+		},
+		addExpense: function (expense) {
+			this.hideParagraph();
+			this.addTableRow(expense);
+			this.showTable();
+		},
+		showExpenses: function (expenses) {
+			if (expenses.length == 0) {
+				p.textContent = 'No expenses recorded';
+				this.showParagraph();
+				return;
+			}
+
+			this.showTable();
+			for (var i = 0; i < expenses.length; i++) {
+				this.addTableRow(expenses[i]);
+			}
 		}
 	};
 })();

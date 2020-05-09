@@ -1,4 +1,4 @@
-import { format, formatISO, parseISO } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { DBClient } from './localDb.js';
 import { view } from './view.js';
 
@@ -8,7 +8,7 @@ var onDbOpened = function () {
 	view.enableAddButton();
 	dbClient.getAllExpenses()
 		.then(function (expenses) {
-			//view.showExpenses(expenses);
+			view.showExpenses(expenses);
 			console.log(expenses);
 		})
 		.catch(function (err) {
@@ -21,6 +21,7 @@ var onExpenseSaved = function (expense) {
 	console.log('expense saved');
 	console.log(expense);
 	view.clearForm();
+	view.addExpense(expense);
 };
 
 view.setEventHandler({
