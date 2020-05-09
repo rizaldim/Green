@@ -4,7 +4,8 @@ export default {
 	input: 'src/js/index.js',
 	output: {
 		file: 'dist/js/index.js',
-		format: 'iife'
+		format: 'iife',
+		sourcemap: true
 	},
 	plugins: [resolve()]
 }
