@@ -22,41 +22,68 @@ export var DBClient = (function () {
 
 		var onTransactionError = function (ev) { }
 
-		var createTransaction = function () {
-			var transaction = db.transaction(['expense'], 'readwrite');
+		var createTransaction = function (opType) {
+			var transaction;
+			if (!!opType) {
+				transaction = db.transaction('expense', opType);
+			} else {
+				transaction = db.transaction('expense');
+			}
 			transaction.oncomplete = onTransactionComplete;
 			transaction.onerror = onTransactionError;
 			return transaction;
 		}
 
+		var getObjectStore = function (name, operationType) {
+			return createTransaction(operationType).objectStore(name);
+		}
+
 		return {
 			open: function () {
-				var req = indexedDB.open(dbName, version);
+				var f = function (resolve, reject) {
+					var req = indexedDB.open(dbName, version);
 
-				req.onerror = function (event) {
-					onOpenDbError(event);
-					if (!!handler.onError) handler.onError();
-				}
+					req.onerror = function (event) {
+						onOpenDbError(event);
+						reject(event);
+					}
 
-				req.onsuccess = function (event) {
-					onOpenDbSuccess(event);
-					if (!!handler.onSuccess) handler.onSuccess();
-				}
+					req.onsuccess = function (event) {
+						onOpenDbSuccess(event);
+						resolve();
+					}
 
-				req.onupgradeneeded = function (event) {
-					db = event.target.result;
-					var store = db.createObjectStore('expense', { autoIncrement: true });
-					store.createIndex('timestamp', 'timestamp', { unique: true });
+					req.onupgradeneeded = function (event) {
+						db = event.target.result;
+						var store = db.createObjectStore('expense', { autoIncrement: true });
+						store.createIndex('timestamp', 'timestamp', { unique: true });
+					}
 				}
+				return new Promise(f);
 			},
-			saveExpense: function (expense, callback) {
-				var request = createTransaction()
-					.objectStore('expense')
-					.add(expense);
-				request.onsuccess = function (ev) {
-					expense.id = ev.target.result;
-					callback(expense);
+			saveExpense: function (expense) {
+				var f = function (resolve, reject) {
+					var request = getObjectStore('expense', 'readwrite').add(expense);
+					request.onsuccess = function (ev) {
+						expense.id = ev.target.result;
+						resolve(expense);
+					}
+					request.onerror = function (ev) {
+						reject(ev);
+					}
 				}
+				return new Promise(f);
+			},
+			getAllExpenses: function () {
+				return new Promise(function (resolve, reject) {
+					var req = getObjectStore('expense').getAll();
+					req.onsuccess = function (ev) {
+						resolve(ev.target.result);
+					}
+					req.onerror = function (ev) {
+						reject(ev);
+					}
+				});
 			}
 		};
 	}

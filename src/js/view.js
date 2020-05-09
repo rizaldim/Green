@@ -15,9 +15,15 @@ export var view = (function () {
 		setEventHandler: function (obj) {
 			handler = obj;
 		},
-		handleEvent: function (ev) {
+		handleEvent: function (type, ev) {
 			ev.preventDefault();
-			if (ev.target == button) {
+			if (type == 'click') {
+				if (ev.target == button) {
+					handler.onAddButtonClicked(amountInput.value, descInput.value);
+				}
+				return;
+			}
+			if (type == 'submit') {
 				handler.onAddButtonClicked(amountInput.value, descInput.value);
 			}
 		},
