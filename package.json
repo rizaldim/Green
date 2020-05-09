@@ -9,7 +9,9 @@
     "js": "rollup --config",
     "css": "sass src/css/main.scss dist/css/style.css",
     "copy": "cp src/pages/* dist/",
-    "build": "npm run clean && npm run js && npm run css && npm run copy"
+    "build": "npm run clean && npm run js && npm run css && npm run copy",
+    "watch": "watchexec -w src 'npm run build'",
+    "serve": "python3 -m http.server --directory dist"
   },
   "repository": {
     "type": "git",
