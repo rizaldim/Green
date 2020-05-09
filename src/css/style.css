@@ -1,5 +1,5 @@
-.container {
-	padding: 1em 2em;
+body {
+	font-family: 'Fredoka One', cursive;
 }
 
 h1 {
@@ -16,6 +16,11 @@ thead {
 
 td, th {
 	padding: .5em;
+}
+
+.container {
+	padding: 1em 2em;
+	height: 100vh;
 }
 
 .stack > * + * {
