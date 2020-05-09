@@ -1,5 +1,6 @@
-body {
-	font-family: 'Fredoka One', cursive;
+:root {
+	font-family: 'Sniglet', cursive;
+	font-size: calc(1rem + .2vw);
 }
 
 h1 {
@@ -8,6 +9,10 @@ h1 {
 
 input {
 	padding: .5em .2em;
+}
+
+button {
+	font-family: inherit;
 }
 
 thead {
