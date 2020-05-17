@@ -2,14 +2,20 @@ import { formatISO } from 'date-fns';
 import { DBClient } from './localDb.js';
 import { view } from './view.js';
 
+var viewState = view.setState({
+	isButtonEnabled: false,
+	expenses: [],
+	amountInput: '',
+	descInput: ''
+});
+
 var dbClient = new DBClient();
 
 var onDbOpened = function () {
-	view.enableAddButton();
+	viewState.isButtonEnabled = true;
 	dbClient.getAllExpenses()
 		.then(function (expenses) {
-			view.showExpenses(expenses);
-			console.log(expenses);
+			viewState.expenses = expenses;
 		})
 		.catch(function (err) {
 			console.log('error getting all expenses');
@@ -18,37 +24,47 @@ var onDbOpened = function () {
 }
 
 var onExpenseSaved = function (expense) {
-	console.log('expense saved');
-	console.log(expense);
-	view.clearForm();
-	view.addExpense(expense);
+	viewState.amountInput = '';
+	viewState.descInput = '';
+	viewState.expenses.push(expense);
 };
 
-view.setEventHandler({
-	onAddButtonClicked: function (amount, desc) {
-		var expense = {
-			time: formatISO(new Date()),
-			amount: amount,
-			description: desc
-		};
-		dbClient.saveExpense(expense)
-			.then(onExpenseSaved)
-			.catch(function (err) {
-				console.log('Error when saving expense');
-				console.log(err);
-			});
+var saveExpense = function (userInput) {
+	var expense = {
+		time: formatISO(new Date()),
+		amount: userInput.amount,
+		description: userInput.description
+	};
+	dbClient.saveExpense(expense)
+		.then(onExpenseSaved)
+		.catch(function (err) {
+			console.log('Error when saving expense');
+			console.log(err);
+		});
+}
+
+var eventHandler = (function () {
+	var onClickButton = function (obj) {
+		saveExpense(obj);
+	};
+
+	var onSubmitForm = function (obj) {
+		saveExpense(obj);
 	}
-});
 
-document.addEventListener('click', function (event) {
-	view.handleEvent('click', event);
-});
+	return {
+		handle: function (eventType, obj) {
+			if (eventType == view.eventType.clickButton) {
+				onClickButton(obj);
+			}
+			if (eventType == view.eventType.submitForm) {
+				onSubmitForm(obj);
+			}
+		}
+	}
+})();
 
-document.addEventListener('submit', function (event) {
-	view.handleEvent('submit', event);
-});
-
-view.clearForm();
+view.setEventHandler(eventHandler);
 
 dbClient.open()
 	.then(onDbOpened)

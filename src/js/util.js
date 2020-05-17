@@ -15,6 +15,13 @@ export var util = (function () {
 		}
 	};
 
+	var tableElement = function (
+		identifier, stateProps, renderFunction, callbacks
+	) {
+		var obj = element(identifier, stateProps, renderFunction);
+		return Object.assign(obj, callbacks);
+	};
+
 	var view = {
 		hide: function (el) {
 			el.style.display = 'none';
@@ -33,7 +40,12 @@ export var util = (function () {
 				newItem = undefined;
 			}
 
+			var onPush = function (parentProp, newItem) {
+				callback.onPush(parentProp, newItem);
+			}
+
 			return {
+				onPush: onPush,
 				get: function (obj, prop) {
 					var propType = Object.prototype.toString.call(obj[prop]);
 					if (propType == '[object Function]') {
@@ -50,7 +62,7 @@ export var util = (function () {
 							prop == currentLength) {
 							newItem = value;
 						} else if (prop == 'length') {
-							callback.onPush(parentProp, newItem);
+							this.onPush(parentProp, newItem);
 							currentLength = obj[prop];
 							reset();
 						}
@@ -69,7 +81,8 @@ export var util = (function () {
 			get: function (obj, prop) {
 				var propType = Object.prototype.toString.call(obj[prop]);
 				if (propType == '[object Array]') {
-					return new Proxy(obj[prop], new ArrayProxyHandler(prop, arrayCallback));
+					return new Proxy(obj[prop],
+						new ArrayProxyHandler(obj[prop], prop, arrayCallback));
 				}
 				if (propType == '[object Object]') {
 					return new Proxy(obj[prop], createProxyHandler(renderFunction));
@@ -93,6 +106,7 @@ export var util = (function () {
 	return {
 		view: view,
 		element: element,
+		tableElement: tableElement,
 		createProxyHandler: createProxyHandler
 	};
 

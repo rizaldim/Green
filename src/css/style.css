@@ -1,26 +1,6 @@
 :root {
 	font-family: 'Sniglet', cursive;
-	font-size: calc(1rem + .2vw);
-}
-
-h1 {
-	font-size: 3rem;
-}
-
-input {
-	padding: .5em .2em;
-}
-
-button {
-	font-family: inherit;
-}
-
-thead {
-	border-bottom: 1px solid black;
-}
-
-td, th {
-	padding: .5em;
+	font-size: calc(1rem + .1vw);
 }
 
 .container {

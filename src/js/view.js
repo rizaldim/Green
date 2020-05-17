@@ -1,78 +1,138 @@
 import { format, parseISO } from 'date-fns';
+import { util } from './util.js';
 
 export var view = (function () {
-	var button = document.querySelector('button');
-	var amountInput = document.querySelector('input#amount');
-	var descInput = document.querySelector('input#description');
-	var table = document.querySelector('table');
-	var p = document.querySelector('p');
+	var eventHandler;
 
-	var hideElement = function (el) {
-		el.style.display = 'none';
+	var eventType = {
+		clickButton: 0,
+		submitForm: 1
 	}
 
-	var handler;
+	document.addEventListener('click', function (event) {
+		event.preventDefault();
+		if (!eventHandler) return;
+		if (event.target == elements.button.el) {
+			eventHandler.handle(eventType.clickButton, {
+				amount: elements.amountInput.el.value,
+				description: elements.descInput.el.value
+			});
+		}
+	});
 
-	return {
-		setEventHandler: function (obj) {
-			handler = obj;
-		},
-		handleEvent: function (type, ev) {
-			ev.preventDefault();
-			if (type == 'click') {
-				if (ev.target == button) {
-					handler.onAddButtonClicked(amountInput.value, descInput.value);
+	document.addEventListener('submit', function (event) {
+		event.preventDefault();
+		if (!eventHandler) return;
+		eventHandler.handle(eventType.submitForm, {
+			amount: elements.amountInput.el.value,
+			description: elements.descInput.el.value
+		});
+	});
+
+	var elements = {
+		amountInput: util.element('input#amount', 'amountInput',
+			function (el, state) {
+				el.value = state.amountInput;
+			}
+		),
+		descInput: util.element('input#description', 'descInput',
+			function (el, state) {
+				el.value = state.descInput;
+			}
+		),
+		button: util.element('button', 'isButtonEnabled',
+			function (el, state) {
+				if (state.isButtonEnabled) {
+					el.removeAttribute('disabled');
+				} else {
+					el.setAttribute('disabled', true);
 				}
-				return;
 			}
-			if (type == 'submit') {
-				handler.onAddButtonClicked(amountInput.value, descInput.value);
+		),
+		p: util.element('p', 'expenses',
+			function (el, state) {
+				if (state.expenses.length == 0) {
+					el.style.removeProperty('display');
+				} else {
+					util.view.hide(el);
+				}
 			}
-		},
-		clearForm: function () {
-			amountInput.value = '';
-			descInput.value = '';
-		},
-		showParagraph: function () {
-			p.style.display = 'block';
-		},
-		hideParagraph: function () {
-			hideElement(p);
-		},
-		showTable: function () {
-			table.style.display = 'block';
-		},
-		enableAddButton: function () {
-			button.removeAttribute('disabled');
-		},
-		constructRow: function (expense) {
-			var time = format(parseISO(expense.time), 'dd/MMM/yyyy HH:mm');
-			var row = document.createElement('tr');
-			row.innerHTML = '<td>' + time + '</td>' +
-				'<td>' + expense.amount + '</td>' +
-				'<td>' + expense.description + '</td>';
-			return row;
-		},
-		addTableRow: function (expense) {
-			var row = this.constructRow(expense);
-			table.appendChild(row);
-		},
-		addExpense: function (expense) {
-			this.hideParagraph();
-			this.addTableRow(expense);
-			this.showTable();
-		},
-		showExpenses: function (expenses) {
-			if (expenses.length == 0) {
-				p.textContent = 'No expenses recorded';
-				this.showParagraph();
-				return;
+		),
+		table: util.tableElement('table', 'expenses',
+			function (el, state) {
+				if (state.expenses.length == 0) {
+					util.view.hide(el);
+				} else {
+					el.style.removeProperty('display');
+					for (var expense of state.expenses) {
+						el.appendChild(constructRow(expense));
+					}
+				}
+			}, {
+				onPush: function (newItem) {
+					this.el.appendChild(constructRow(newItem));
+				}
 			}
+		)
+	};
 
-			this.showTable();
-			for (var i = 0; i < expenses.length; i++) {
-				this.addTableRow(expenses[i]);
+	var render = function (state, prop) {
+		for (var name in elements) {
+			elements[name].render(state, prop);
+		}
+	}
+
+	var stateHandler = util.createProxyHandler(render, {
+		onPush: function (prop, newItem) {
+			if (prop == 'expenses') {
+				elements.table.onPush(newItem);
 			}
 		}
+	});
+
+	var stateProxy;
+
+	function constructRow (expense) {
+		var time = format(parseISO(expense.time), 'dd/MMM/yyyy HH:mm');
+		var row = document.createElement('tr');
+		row.innerHTML = '<td>' + time + '</td>' +
+			'<td>' + expense.amount + '</td>' +
+			'<td>' + expense.description + '</td>';
+		return row;
+	}
+
+	function addTableRow (expense) {
+		var row = constructRow(expense);
+		table.appendChild(row);
+	}
+
+	function addExpense (expense) {
+		this.hideParagraph();
+		this.addTableRow(expense);
+		this.showTable();
+	}
+
+	function showExpenses (expenses) {
+		if (expenses.length == 0) {
+			p.textContent = 'No expenses recorded';
+			showParagraph();
+			return;
+		}
+
+		showTable();
+		for (var i = 0; i < expenses.length; i++) {
+			addTableRow(expenses[i]);
+		}
+	}
+
+	return {
+		eventType: eventType,
+		setState: function (state) {
+			render(state);
+			return new Proxy(state, stateHandler);
+		},
+		setEventHandler: function (obj) {
+			eventHandler = obj;
+		},
 	};
 })();
