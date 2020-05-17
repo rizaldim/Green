@@ -101,30 +101,6 @@ export var view = (function () {
 		return row;
 	}
 
-	function addTableRow (expense) {
-		var row = constructRow(expense);
-		table.appendChild(row);
-	}
-
-	function addExpense (expense) {
-		this.hideParagraph();
-		this.addTableRow(expense);
-		this.showTable();
-	}
-
-	function showExpenses (expenses) {
-		if (expenses.length == 0) {
-			p.textContent = 'No expenses recorded';
-			showParagraph();
-			return;
-		}
-
-		showTable();
-		for (var i = 0; i < expenses.length; i++) {
-			addTableRow(expenses[i]);
-		}
-	}
-
 	return {
 		eventType: eventType,
 		setState: function (state) {
